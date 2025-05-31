@@ -64,7 +64,7 @@ const chartData = {
   ],
 };
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Simulate API delay for realistic experience
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
 // POST endpoint for real-time updates simulation
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    await request.json();
     
     // Simulate real-time data update
     const updatedMetrics = {

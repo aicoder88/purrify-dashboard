@@ -25,7 +25,7 @@ interface HealthCheckResponse {
 /**
  * Health check endpoint for monitoring and load balancers
  */
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(_request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
   
   try {

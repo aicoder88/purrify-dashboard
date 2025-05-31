@@ -1,11 +1,11 @@
 'use client';
 
-import * as React from 'react';
 import { motion } from 'framer-motion';
+import * as React from 'react';
 import { MainLayout } from '@/components/layout/main-layout';
-import { 
-  AnimatedMetricCard, 
-  DashboardChart, 
+import {
+  AnimatedMetricCard,
+  DashboardChart,
   ErrorBoundary,
   DashboardSkeleton,
   Button
@@ -44,7 +44,7 @@ const RefreshIcon = () => (
 );
 
 function DashboardContent() {
-  const { data, isLoading, error, refetch } = useDashboardData();
+  const { data, isLoading, error } = useDashboardData();
   const refreshMutation = useRefreshDashboard();
 
   const handleRefresh = () => {

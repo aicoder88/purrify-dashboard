@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import { NextResponse, type NextRequest } from 'next/server';
 
 // Define protected routes
 const protectedRoutes = [
@@ -13,7 +12,7 @@ const protectedRoutes = [
 ];
 
 // Define public routes that don't require authentication
-const publicRoutes = [
+const _publicRoutes = [
   '/',
   '/login',
   '/register',
@@ -31,10 +30,6 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
   
-  // Check if the route is public
-  const isPublicRoute = publicRoutes.some(route => 
-    pathname === route || pathname.startsWith(route)
-  );
 
   // Get token from cookies or Authorization header
   const token = request.cookies.get('auth-token')?.value || 

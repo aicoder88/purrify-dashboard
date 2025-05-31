@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ReactQueryProvider } from "@/lib/react-query";
-import PWAProvider from "../components/pwa/pwa-provider";
 import { EnhancedErrorBoundary } from "@/components/ui/enhanced-error-boundary";
 import { ConnectionStatus } from "@/components/ui/enhanced-loading";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { ReactQueryProvider } from "@/lib/react-query";
+import PWAProvider from "../components/pwa/pwa-provider";
 // import { initPerformanceMonitoring, reportWebVitals } from "@/lib/performance";
 // import { initCacheCleanup } from "@/lib/cache";
 // import { analytics } from "@/lib/analytics";
@@ -137,6 +137,7 @@ export default function RootLayout({
         
         {/* Preload critical resources */}
         <link rel="preload" href="/manifest.json" as="fetch" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         

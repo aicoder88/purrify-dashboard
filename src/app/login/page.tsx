@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import * as React from 'react';
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { DarkModeToggle } from '@/components/ui/dark-mode-toggle';
 import { useAuthStore } from '@/store/auth-store';
@@ -151,7 +151,7 @@ function LoginForm() {
         {/* Footer */}
         <div className="text-center text-sm opacity-70">
           <p>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <a href="/register" className="text-teal-500 hover:text-teal-400 transition-colors">
               Contact your administrator
             </a>

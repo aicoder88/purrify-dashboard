@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
+import { NextRequest, NextResponse } from 'next/server';
 import type { LoginCredentials, User } from '@/types';
 
 // Mock user data - replace with actual database query
@@ -23,7 +23,7 @@ const mockUsers: User[] = [
 ];
 
 // Mock password verification - replace with actual password hashing
-const verifyPassword = (email: string, password: string): boolean => {
+const verifyPassword = (email: string, _password: string): boolean => {
   // For demo purposes, accept any password for existing users
   return mockUsers.some(user => user.email === email);
 };

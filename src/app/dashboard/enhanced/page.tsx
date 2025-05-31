@@ -1,9 +1,10 @@
 'use client';
 
-import * as React from 'react';
+import { startOfDay, endOfDay, subDays } from 'date-fns';
 import { motion } from 'framer-motion';
+import * as React from 'react';
 import { MainLayout } from '@/components/layout/main-layout';
-import { 
+import {
   EnhancedChart,
   EnhancedDateRangePicker,
   MultiSelectFilter,
@@ -17,10 +18,9 @@ import {
   useTheme
 } from '@/components/ui';
 import { useDashboardData, useRefreshDashboard } from '@/hooks/use-dashboard-data';
-import { useRealTimeData } from '@/hooks/use-realtime-data';
 import { useKeyboardShortcuts, createDefaultShortcuts } from '@/hooks/use-keyboard-shortcuts';
-import { DateRange, FilterState, SocialMediaPost, type SocialMediaWidget as SocialMediaWidgetType } from '@/types';
-import { startOfDay, endOfDay, subDays } from 'date-fns';
+import { useRealTimeData } from '@/hooks/use-realtime-data';
+import { FilterState, type SocialMediaWidget as SocialMediaWidgetType } from '@/types';
 
 // Mock data for demonstration
 const mockSocialData: SocialMediaWidgetType = {
@@ -119,7 +119,7 @@ const ClearIcon = () => (
 );
 
 function EnhancedDashboardContent() {
-  const { data, isLoading, error, refetch } = useDashboardData();
+  const { data, isLoading, error } = useDashboardData();
   const refreshMutation = useRefreshDashboard();
   const { toggleDarkMode } = useTheme();
 

@@ -1,11 +1,11 @@
 'use client';
 
-import * as React from 'react';
 import { motion } from 'framer-motion';
+import * as React from 'react';
 import { MainLayout } from '@/components/layout/main-layout';
-import { Card } from '@/components/ui/card';
 import { MobileChart } from '@/components/mobile/mobile-chart';
 import { MobileDatePicker } from '@/components/mobile/mobile-date-picker';
+import { Card } from '@/components/ui/card';
 import { useHapticFeedback } from '@/hooks/use-mobile-gestures';
 
 // Sample chart data
