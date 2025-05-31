@@ -81,15 +81,16 @@ export interface DashboardLayoutProps {
 
 export interface MetricCardProps {
   title: string;
-  value: string | number;
+  value: string | number | React.ReactNode;
   change?: {
     value: number;
     type: 'increase' | 'decrease';
     period: string;
-  };
+  } | undefined;
   icon?: React.ReactNode;
   loading?: boolean;
   className?: string;
+  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
 }
 
 export interface ChartProps {
@@ -123,7 +124,7 @@ export interface Column<T> {
 
 // Button Component Types
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'destructive';
+export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'danger' | 'ghost' | 'outline' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

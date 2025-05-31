@@ -4,7 +4,7 @@ import * as React from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { formatNumber, formatPercentage } from '@/lib/utils';
-import { Card, CardContent } from './card';
+import { MetricCard } from './metric-card';
 import type { MetricCardProps } from '@/types';
 
 interface AnimatedMetricCardProps extends MetricCardProps {
@@ -42,6 +42,7 @@ const AnimatedMetricCard = React.forwardRef<HTMLDivElement, AnimatedMetricCardPr
     icon, 
     loading = false, 
     animationDelay = 0,
+    variant = "default",
     className,
     ...props 
   }, ref) => {
@@ -61,20 +62,17 @@ const AnimatedMetricCard = React.forwardRef<HTMLDivElement, AnimatedMetricCardPr
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: animationDelay / 1000 }}
         >
-          <Card ref={ref} className={cn("metric-card", className)} {...props}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2 flex-1">
-                  <div className="skeleton h-4 w-24 animate-pulse bg-neutral-200 rounded"></div>
-                  <div className="skeleton h-8 w-16 animate-pulse bg-neutral-200 rounded"></div>
-                  <div className="skeleton h-3 w-20 animate-pulse bg-neutral-200 rounded"></div>
-                </div>
-                {icon && (
-                  <div className="skeleton h-8 w-8 rounded animate-pulse bg-neutral-200"></div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <MetricCard 
+            ref={ref} 
+            title={title}
+            value={value}
+            change={change}
+            icon={icon}
+            loading={true}
+            variant={variant}
+            className={className}
+            {...props}
+          />
         </motion.div>
       );
     }
@@ -89,102 +87,34 @@ const AnimatedMetricCard = React.forwardRef<HTMLDivElement, AnimatedMetricCardPr
           ease: [0.25, 0.46, 0.45, 0.94]
         }}
         whileHover={{ 
-          y: -4,
-          transition: { duration: 0.2 }
+          y: -8,
+          scale: 1.02,
+          transition: { duration: 0.3, ease: "easeOut" }
+        }}
+        whileTap={{ 
+          scale: 0.98,
+          transition: { duration: 0.1 }
         }}
       >
-        <Card 
+        <MetricCard 
           ref={ref} 
-          hover 
+          title={title}
+          value={typeof value === 'number' && isVisible ? (
+            <AnimatedCounter value={numericValue} />
+          ) : (
+            displayValue
+          )}
+          change={change}
+          icon={icon}
+          variant={variant}
           className={cn(
-            "metric-card transition-all duration-200 hover:shadow-lg border-0 bg-white",
+            "group cursor-pointer",
+            "hover:shadow-2xl hover:shadow-primary-500/20",
+            "transition-all duration-500 ease-out",
             className
-          )} 
+          )}
           {...props}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2 flex-1">
-                <motion.p 
-                  className="metric-label text-sm font-medium text-neutral-600"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: (animationDelay + 200) / 1000 }}
-                >
-                  {title}
-                </motion.p>
-                
-                <motion.p 
-                  className="metric-value text-2xl font-bold text-charcoal-900"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: (animationDelay + 400) / 1000 }}
-                >
-                  {typeof value === 'number' && isVisible ? (
-                    <AnimatedCounter value={numericValue} />
-                  ) : (
-                    displayValue
-                  )}
-                </motion.p>
-                
-                {change && (
-                  <motion.div 
-                    className="flex items-center space-x-1"
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: (animationDelay + 600) / 1000 }}
-                  >
-                    <motion.span
-                      className={cn(
-                        "metric-change text-sm font-medium flex items-center",
-                        change.type === 'increase' 
-                          ? "text-success-600" 
-                          : "text-warning-600"
-                      )}
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <motion.span
-                        initial={{ rotate: 0 }}
-                        animate={{ rotate: change.type === 'increase' ? -45 : 45 }}
-                        transition={{ delay: (animationDelay + 800) / 1000 }}
-                        className="mr-1"
-                      >
-                        {change.type === 'increase' ? '↗' : '↘'}
-                      </motion.span>
-                      {formatPercentage(Math.abs(change.value))}
-                    </motion.span>
-                    <span className="text-xs text-neutral-500">
-                      {change.period}
-                    </span>
-                  </motion.div>
-                )}
-              </div>
-              
-              {icon && (
-                <motion.div 
-                  className="flex-shrink-0 ml-4"
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ 
-                    delay: (animationDelay + 300) / 1000,
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 15
-                  }}
-                  whileHover={{ 
-                    scale: 1.1,
-                    rotate: 5,
-                    transition: { duration: 0.2 }
-                  }}
-                >
-                  <div className="w-12 h-12 flex items-center justify-center text-teal-500 bg-teal-50 rounded-lg">
-                    {icon}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        />
       </motion.div>
     );
   }
