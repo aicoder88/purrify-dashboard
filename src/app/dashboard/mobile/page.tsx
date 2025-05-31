@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import * as React from 'react';
-import { MainLayout } from '@/components/layout/main-layout';
+import { NewMainLayout } from '@/components/layout/new-main-layout';
 import { MobileChart } from '@/components/mobile/mobile-chart';
 import { MobileDatePicker } from '@/components/mobile/mobile-date-picker';
 import { Card } from '@/components/ui/card';
@@ -65,7 +65,7 @@ export default function MobileDashboardPage() {
   };
 
   return (
-    <MainLayout>
+    <NewMainLayout>
       <div className="space-y-6">
         {/* Header */}
         <motion.div
@@ -264,6 +264,6 @@ export default function MobileDashboardPage() {
           </Card>
         </motion.div>
       </div>
-    </MainLayout>
+    </NewMainLayout>
   );
 }

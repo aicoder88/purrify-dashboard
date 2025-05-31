@@ -1,18 +1,86 @@
 'use client';
 
+import { startOfDay, endOfDay, subDays } from 'date-fns';
 import { motion } from 'framer-motion';
 import * as React from 'react';
-import { MainLayout } from '@/components/layout/main-layout';
+import { NewMainLayout } from '@/components/layout/new-main-layout';
 import {
+  EnhancedChart,
+  EnhancedDateRangePicker,
+  MultiSelectFilter,
+  SocialMediaWidget,
   AnimatedMetricCard,
-  DashboardChart,
   ErrorBoundary,
   DashboardSkeleton,
-  Button
+  Button,
+  DarkModeToggle,
+  useTheme
 } from '@/components/ui';
 import { useDashboardData, useRefreshDashboard } from '@/hooks/use-dashboard-data';
+import { useKeyboardShortcuts, createDefaultShortcuts } from '@/hooks/use-keyboard-shortcuts';
+import { useRealTimeData } from '@/hooks/use-realtime-data';
+import { FilterState, type SocialMediaWidget as SocialMediaWidgetType } from '@/types';
 
-// Enhanced Icons with modern styling
+// Mock data for demonstration
+const mockSocialData: SocialMediaWidgetType = {
+  title: 'Recent Posts',
+  totalEngagement: 15420,
+  growthRate: 12.5,
+  posts: [
+    {
+      id: '1',
+      platform: 'instagram',
+      content: '🐱 New Purrify Premium formula is here! Your cats will love the improved taste and nutrition. #PurrifyPremium #CatNutrition',
+      imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop',
+      engagement: { likes: 1250, comments: 89, shares: 45, views: 5600 },
+      createdAt: new Date('2024-01-15'),
+      url: 'https://instagram.com/purrify/post/1',
+    },
+    {
+      id: '2',
+      platform: 'facebook',
+      content: 'Thank you to all our retail partners! Together we\'re making cats happier and healthier across Canada. 🇨🇦',
+      engagement: { likes: 890, comments: 156, shares: 78 },
+      createdAt: new Date('2024-01-14'),
+      url: 'https://facebook.com/purrify/post/2',
+    },
+    {
+      id: '3',
+      platform: 'twitter',
+      content: 'Did you know? 95% of cats prefer Purrify over other brands in taste tests! 📊 #CatFacts #PurrifyStats',
+      engagement: { likes: 445, comments: 67, shares: 123, views: 2100 },
+      createdAt: new Date('2024-01-13'),
+      url: 'https://twitter.com/purrify/status/3',
+    },
+  ],
+};
+
+const regionOptions = [
+  { value: 'bc', label: 'British Columbia', count: 45 },
+  { value: 'ab', label: 'Alberta', count: 38 },
+  { value: 'on', label: 'Ontario', count: 67 },
+  { value: 'qc', label: 'Quebec', count: 52 },
+  { value: 'mb', label: 'Manitoba', count: 23 },
+  { value: 'sk', label: 'Saskatchewan', count: 19 },
+];
+
+const storeTypeOptions = [
+  { value: 'pet-store', label: 'Pet Store', count: 89 },
+  { value: 'veterinary', label: 'Veterinary Clinic', count: 67 },
+  { value: 'farm-supply', label: 'Farm Supply', count: 34 },
+  { value: 'grocery', label: 'Grocery Store', count: 23 },
+  { value: 'online', label: 'Online Retailer', count: 31 },
+];
+
+const salesRepOptions = [
+  { value: 'sarah-m', label: 'Sarah Mitchell', count: 45 },
+  { value: 'john-d', label: 'John Davis', count: 38 },
+  { value: 'emily-r', label: 'Emily Rodriguez', count: 52 },
+  { value: 'michael-c', label: 'Michael Chen', count: 41 },
+  { value: 'lisa-w', label: 'Lisa Wilson', count: 29 },
+];
+
+// Icons for the metrics
 const StoreIcon = () => (
   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -43,19 +111,75 @@ const RefreshIcon = () => (
   </svg>
 );
 
-const SparkleIcon = () => (
-  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+const ClearIcon = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
 
-function DashboardContent() {
+function EnhancedDashboardContent() {
   const { data, isLoading, error } = useDashboardData();
   const refreshMutation = useRefreshDashboard();
+  const { toggleDarkMode } = useTheme();
+
+  // Filter state
+  const [filters, setFilters] = React.useState<FilterState>({
+    dateRange: {
+      from: startOfDay(subDays(new Date(), 30)),
+      to: endOfDay(new Date()),
+    },
+    regions: [],
+    storeTypes: [],
+    salesReps: [],
+    searchQuery: '',
+  });
+
+  // Real-time data
+  const handleRealTimeUpdate = React.useCallback((update: any) => {
+    console.log('Real-time update:', update);
+    // In a real app, you'd update your data based on the update type
+  }, []);
+
+  const { connection, lastUpdate } = useRealTimeData({
+    onUpdate: handleRealTimeUpdate,
+  });
+
+  // Keyboard shortcuts
+  const handleRefreshData = React.useCallback(() => {
+    refreshMutation.mutate();
+  }, [refreshMutation]);
+
+  const shortcuts = React.useMemo(() => createDefaultShortcuts({
+    refreshData: handleRefreshData,
+    toggleSidebar: () => console.log('Toggle sidebar'),
+    openSearch: () => console.log('Open search'),
+    exportData: () => console.log('Export data'),
+    showHelp: () => console.log('Show help'),
+    toggleDarkMode,
+  }), [handleRefreshData, toggleDarkMode]);
+
+  useKeyboardShortcuts({ shortcuts });
 
   const handleRefresh = () => {
     refreshMutation.mutate();
   };
+
+  const handleClearFilters = () => {
+    setFilters({
+      dateRange: { from: null, to: null },
+      regions: [],
+      storeTypes: [],
+      salesReps: [],
+      searchQuery: '',
+    });
+  };
+
+  const hasActiveFilters = 
+    filters.dateRange.from || 
+    filters.regions.length > 0 || 
+    filters.storeTypes.length > 0 || 
+    filters.salesReps.length > 0 || 
+    filters.searchQuery.length > 0;
 
   if (error) {
     throw error; // This will be caught by the ErrorBoundary
@@ -68,15 +192,7 @@ function DashboardContent() {
   if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full glass flex items-center justify-center">
-            <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-          </div>
-          <p className="text-white/60 font-medium">No data available</p>
-          <p className="text-white/40 text-sm">Please check your connection and try again</p>
-        </div>
+        <p className="text-neutral-500">No data available</p>
       </div>
     );
   }
@@ -87,202 +203,230 @@ function DashboardContent() {
       value: data.metrics.totalStoresContacted.value,
       change: data.metrics.totalStoresContacted.change,
       icon: <StoreIcon />,
-      variant: 'primary' as const,
     },
     {
       title: 'Samples Given',
       value: data.metrics.samplesGiven.value,
       change: data.metrics.samplesGiven.change,
       icon: <SampleIcon />,
-      variant: 'secondary' as const,
     },
     {
       title: 'Stores That Bought Once',
       value: data.metrics.storesBoughtOnce.value,
       change: data.metrics.storesBoughtOnce.change,
       icon: <PurchaseIcon />,
-      variant: 'success' as const,
     },
     {
       title: 'Stores That Bought More Than Once',
       value: data.metrics.storesBoughtMoreThanOnce.value,
       change: data.metrics.storesBoughtMoreThanOnce.change,
       icon: <RepeatIcon />,
-      variant: 'warning' as const,
     },
   ];
 
-  return (
-    <div className="space-y-8 p-6">
-      {/* Floating Background Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary-500/5 rounded-full blur-3xl animate-float" />
-        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl animate-float-delayed" />
-        <div className="absolute bottom-1/4 left-1/3 w-48 h-48 bg-secondary-500/5 rounded-full blur-3xl animate-float" />
-      </div>
+  // Generate sample chart data
+  const lineChartData = Array.from({ length: 30 }, (_, i) => ({
+    x: `Day ${i + 1}`,
+    y: Math.floor(Math.random() * 1000) + 500,
+    label: `Day ${i + 1}`,
+  }));
 
+  const pieChartData = [
+    { x: 'Pet Stores', y: 45, label: 'Pet Stores' },
+    { x: 'Veterinary', y: 30, label: 'Veterinary' },
+    { x: 'Farm Supply', y: 15, label: 'Farm Supply' },
+    { x: 'Other', y: 10, label: 'Other' },
+  ];
+
+  return (
+    <div className="space-y-8">
       {/* Page Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative"
+        transition={{ duration: 0.5 }}
+        className="flex items-center justify-between"
       >
-        <div className="glass-card p-8 border-2 border-white/10">
-          <div className="flex items-center justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow-primary">
-                  <SparkleIcon />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold text-gradient">
-                    Purrify Sales Dashboard
-                  </h1>
-                  <p className="text-white/70 text-lg font-medium mt-1">
-                    Track your sales performance and customer engagement metrics in real-time
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-            >
-              <Button
-                onClick={handleRefresh}
-                disabled={refreshMutation.isPending}
-                variant="primary"
-                size="lg"
-                className="group relative overflow-hidden"
-              >
-                <motion.div
-                  animate={refreshMutation.isPending ? { rotate: 360 } : { rotate: 0 }}
-                  transition={{ 
-                    duration: 1, 
-                    repeat: refreshMutation.isPending ? Infinity : 0,
-                    ease: "linear"
-                  }}
-                  className="mr-3"
-                >
-                  <RefreshIcon />
-                </motion.div>
-                <span className="font-semibold">
-                  {refreshMutation.isPending ? 'Refreshing...' : 'Refresh Data'}
-                </span>
-                
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              </Button>
-            </motion.div>
+        <div>
+          <h1 className="text-3xl font-bold text-charcoal-900 dark:text-white">Enhanced Sales Dashboard</h1>
+          <p className="text-neutral-600 dark:text-neutral-300 mt-2">
+            Advanced analytics with real-time updates and interactive features.
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <DarkModeToggle />
+          
+          {/* Connection Status */}
+          <div className="flex items-center gap-2 text-sm">
+            <div className={`w-2 h-2 rounded-full ${connection.isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <span className="text-neutral-600 dark:text-neutral-300">
+              {connection.isConnected ? 'Connected' : 'Disconnected'}
+            </span>
           </div>
           
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-500/10 to-accent-500/10 rounded-full blur-2xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-secondary-500/10 to-success-500/10 rounded-full blur-2xl" />
+          <Button
+            onClick={handleRefresh}
+            disabled={refreshMutation.isPending}
+            className="bg-teal-500 hover:bg-teal-600 text-white"
+          >
+            <motion.div
+              animate={refreshMutation.isPending ? { rotate: 360 } : { rotate: 0 }}
+              transition={{ duration: 1, repeat: refreshMutation.isPending ? Infinity : 0 }}
+            >
+              <RefreshIcon />
+            </motion.div>
+            <span className="ml-2">
+              {refreshMutation.isPending ? 'Refreshing...' : 'Refresh Data'}
+            </span>
+          </Button>
+        </div>
+      </motion.div>
+
+      {/* Advanced Filters */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-charcoal-900 dark:text-white">Filters</h3>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearFilters}
+              className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"
+            >
+              <ClearIcon />
+              <span className="ml-1">Clear All</span>
+            </Button>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <EnhancedDateRangePicker
+            value={filters.dateRange}
+            onChange={(range) => setFilters(prev => ({ ...prev, dateRange: range }))}
+            placeholder="Select date range"
+          />
+          
+          <MultiSelectFilter
+            options={regionOptions}
+            value={filters.regions}
+            onChange={(regions) => setFilters(prev => ({ ...prev, regions }))}
+            placeholder="Select regions"
+          />
+          
+          <MultiSelectFilter
+            options={storeTypeOptions}
+            value={filters.storeTypes}
+            onChange={(storeTypes) => setFilters(prev => ({ ...prev, storeTypes }))}
+            placeholder="Select store types"
+          />
+          
+          <MultiSelectFilter
+            options={salesRepOptions}
+            value={filters.salesReps}
+            onChange={(salesReps) => setFilters(prev => ({ ...prev, salesReps }))}
+            placeholder="Select sales reps"
+          />
         </div>
       </motion.div>
 
       {/* Metrics Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.6 }}
-        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
-      >
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map((metric, index) => (
-          <motion.div
+          <AnimatedMetricCard
             key={metric.title}
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ 
-              delay: 0.5 + (index * 0.1), 
-              duration: 0.5,
-              ease: "easeOut"
-            }}
-          >
-            <AnimatedMetricCard
-              title={metric.title}
-              value={metric.value}
-              change={metric.change}
-              icon={metric.icon}
-              variant={metric.variant}
-              animationDelay={index * 100}
-            />
-          </motion.div>
+            title={metric.title}
+            value={metric.value}
+            change={metric.change}
+            icon={metric.icon}
+            animationDelay={index * 100}
+          />
         ))}
-      </motion.div>
+      </div>
 
-      {/* Chart Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.6 }}
-        className="glass-card p-6 border border-white/10"
-      >
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gradient mb-2">
-            Sales Performance Overview
-          </h2>
-          <p className="text-white/60">
-            Comprehensive view of your sales trends and performance metrics
-          </p>
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <EnhancedChart
+          data={lineChartData}
+          type="line"
+          title="Sales Trend (30 Days)"
+          height={400}
+          animated={true}
+          exportable={true}
+        />
+        
+        <EnhancedChart
+          data={pieChartData}
+          type="pie"
+          title="Sales by Store Type"
+          height={400}
+          animated={true}
+          exportable={true}
+        />
+      </div>
+
+      {/* Social Media Widget */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <EnhancedChart
+            data={lineChartData}
+            type="area"
+            title="Revenue Growth"
+            height={300}
+            animated={true}
+            exportable={true}
+          />
         </div>
         
-        <DashboardChart
-          data={data.chartData}
-          title="Sales Performance Overview"
-          height={400}
+        <SocialMediaWidget
+          data={mockSocialData}
+          loading={false}
         />
-      </motion.div>
+      </div>
 
-      {/* Stats Summary */}
+      {/* Real-time Updates Info */}
+      {lastUpdate && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
+            <span className="text-sm text-teal-700 dark:text-teal-300">
+              Last update: {lastUpdate.type} at {new Date(lastUpdate.timestamp).toLocaleTimeString()}
+            </span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Keyboard Shortcuts Help */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.0, duration: 0.6 }}
-        className="glass-card p-6 border border-white/10"
+        transition={{ delay: 1 }}
+        className="text-center text-sm text-neutral-500 dark:text-neutral-400"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-gradient-accent flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-white/90 font-semibold">Last Updated</p>
-              <p className="text-white/60 text-sm">
-                {new Date(data.lastUpdated).toLocaleString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 text-success-400">
-            <div className="w-2 h-2 bg-success-400 rounded-full animate-pulse" />
-            <span className="text-sm font-medium">Live Data</span>
-          </div>
-        </div>
+        <p>
+          Press <kbd className="px-2 py-1 bg-neutral-100 dark:bg-neutral-700 rounded text-xs">Ctrl+R</kbd> to refresh, 
+          <kbd className="px-2 py-1 bg-neutral-100 dark:bg-neutral-700 rounded text-xs ml-1">Ctrl+Shift+D</kbd> to toggle dark mode
+        </p>
       </motion.div>
     </div>
   );
 }
 
-export default function DashboardPage() {
+export default function EnhancedDashboardPage() {
   return (
-    <MainLayout>
+    <NewMainLayout>
       <ErrorBoundary>
-        <DashboardContent />
+        <EnhancedDashboardContent />
       </ErrorBoundary>
-    </MainLayout>
+    </NewMainLayout>
   );
 }

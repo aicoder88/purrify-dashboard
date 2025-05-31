@@ -1,9 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui';
 import { DarkModeToggle } from '@/components/ui/dark-mode-toggle';
+import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
 
 interface HeaderProps {

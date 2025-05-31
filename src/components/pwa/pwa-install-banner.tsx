@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as React from 'react';
 import { usePWAInstallBanner } from '@/hooks/use-pwa';
 
 const InstallIcon = () => (

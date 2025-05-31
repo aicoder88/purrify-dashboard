@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import { EnhancedErrorBoundary } from "@/components/ui/enhanced-error-boundary";
 import { ConnectionStatus } from "@/components/ui/enhanced-loading";
@@ -9,6 +9,12 @@ import PWAProvider from "../components/pwa/pwa-provider";
 // import { initPerformanceMonitoring, reportWebVitals } from "@/lib/performance";
 // import { initCacheCleanup } from "@/lib/cache";
 // import { analytics } from "@/lib/analytics";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,8 +26,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#1ABC9C",
-  colorScheme: "dark",
+  themeColor: "#00D4FF",
+  colorScheme: "light",
 };
 
 export const metadata: Metadata = {
@@ -119,7 +125,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${poppins.variable} ${inter.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -132,7 +138,7 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#1ABC9C" />
+        <meta name="msapplication-TileColor" content="#00D4FF" />
         <meta name="msapplication-tap-highlight" content="no" />
         
         {/* Preload critical resources */}

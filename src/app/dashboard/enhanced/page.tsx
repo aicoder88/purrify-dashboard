@@ -3,7 +3,7 @@
 import { startOfDay, endOfDay, subDays } from 'date-fns';
 import { motion } from 'framer-motion';
 import * as React from 'react';
-import { MainLayout } from '@/components/layout/main-layout';
+import { NewMainLayout } from '@/components/layout/new-main-layout';
 import {
   EnhancedChart,
   EnhancedDateRangePicker,
@@ -14,7 +14,6 @@ import {
   DashboardSkeleton,
   Button,
   DarkModeToggle,
-  ThemeProvider,
   useTheme
 } from '@/components/ui';
 import { useDashboardData, useRefreshDashboard } from '@/hooks/use-dashboard-data';
@@ -424,12 +423,10 @@ function EnhancedDashboardContent() {
 
 export default function EnhancedDashboardPage() {
   return (
-    <ThemeProvider>
-      <MainLayout>
-        <ErrorBoundary>
-          <EnhancedDashboardContent />
-        </ErrorBoundary>
-      </MainLayout>
-    </ThemeProvider>
+    <NewMainLayout>
+      <ErrorBoundary>
+        <EnhancedDashboardContent />
+      </ErrorBoundary>
+    </NewMainLayout>
   );
 }

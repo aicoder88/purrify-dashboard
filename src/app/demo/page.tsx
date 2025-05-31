@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input, SearchInput, PasswordInput } from '@/components/ui/input';
 import {
   Card,
   CardHeader,
@@ -12,8 +14,6 @@ import {
   FeatureCard
 } from '@/components/ui/card';
 import { MetricCard } from '@/components/ui/metric-card';
-import { Button } from '@/components/ui/button';
-import { Input, SearchInput, PasswordInput } from '@/components/ui/input';
 
 // Demo Icons
 const ChartIcon = () => (

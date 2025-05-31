@@ -1,13 +1,13 @@
 'use client';
 
-import * as React from 'react';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import * as React from 'react';
+import { ConnectionStatusIndicator } from '@/components/pwa/pwa-status-indicator';
 import { Button } from '@/components/ui';
 import { useMobileGestures, useHapticFeedback } from '@/hooks/use-mobile-gestures';
-import { ConnectionStatusIndicator } from '@/components/pwa/pwa-status-indicator';
+import { cn } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
 const navigationItems: NavItem[] = [
@@ -100,7 +100,7 @@ export function EnhancedMobileNav({ isOpen, onClose }: EnhancedMobileNavProps) {
     setDragX(0);
   };
 
-  const handleNavItemClick = (href: string) => {
+  const handleNavItemClick = (_href: string) => {
     selectionChanged();
     onClose();
   };

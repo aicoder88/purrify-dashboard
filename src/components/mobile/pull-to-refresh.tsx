@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as React from 'react';
 import { usePullToRefresh, useHapticFeedback } from '@/hooks/use-mobile-gestures';
 
 const RefreshIcon = ({ isSpinning = false }: { isSpinning?: boolean }) => (

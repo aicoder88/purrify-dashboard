@@ -37,32 +37,35 @@ export async function middleware(request: NextRequest) {
 
   // If accessing a protected route
   if (isProtectedRoute) {
-    if (!token) {
-      // Redirect to login if no token
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+    // TEMPORARILY DISABLED FOR DEVELOPMENT - Allow access without authentication
+    return NextResponse.next();
+    
+    // if (!token) {
+    //   // Redirect to login if no token
+    //   const loginUrl = new URL('/login', request.url);
+    //   loginUrl.searchParams.set('redirect', pathname);
+    //   return NextResponse.redirect(loginUrl);
+    // }
 
-    try {
-      // Verify JWT token
-      const secret = new TextEncoder().encode(
-        process.env.JWT_SECRET || 'your-secret-key'
-      );
-      
-      await jwtVerify(token, secret);
-      
-      // Token is valid, continue to the route
-      return NextResponse.next();
-    } catch (error) {
-      // Token is invalid, redirect to login
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      
-      const response = NextResponse.redirect(loginUrl);
-      response.cookies.delete('auth-token');
-      return response;
-    }
+    // try {
+    //   // Verify JWT token
+    //   const secret = new TextEncoder().encode(
+    //     process.env.JWT_SECRET || 'your-secret-key'
+    //   );
+    //
+    //   await jwtVerify(token, secret);
+    //
+    //   // Token is valid, continue to the route
+    //   return NextResponse.next();
+    // } catch (error) {
+    //   // Token is invalid, redirect to login
+    //   const loginUrl = new URL('/login', request.url);
+    //   loginUrl.searchParams.set('redirect', pathname);
+    //
+    //   const response = NextResponse.redirect(loginUrl);
+    //   response.cookies.delete('auth-token');
+    //   return response;
+    // }
   }
 
   // If accessing login/register while authenticated

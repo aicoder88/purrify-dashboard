@@ -1,13 +1,52 @@
 'use client';
 
-import * as React from 'react';
-import { motion } from 'framer-motion';
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
   Title,
+} from 'chart.js';
+import { motion } from 'framer-motion';
+import * as React from 'react';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+);
+
+interface DashboardChartProps {
+  data: {
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      backgroundColor: string;
+    }[];
+  };
+  options?: any;
+  className?: string;
+}
+
+export const DashboardChart: React.FC<DashboardChartProps> = ({
+  data,
+  options,
+  className = '',
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`bg-card text-card-foreground rounded-lg shadow-sm p-4 ${className}`}
+    >
+      <Bar data={data} options={options} />
+    </motion.div>
+  );
+};
   Tooltip,
   Legend,
   ChartOptions,

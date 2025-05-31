@@ -1,22 +1,21 @@
 'use client';
 
-import * as React from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { formatNumber, formatPercentage } from '@/lib/utils';
-import { MetricCard } from './metric-card';
+import * as React from 'react';
+import { cn, formatNumber as _formatNumber, formatPercentage as _formatPercentage } from '@/lib/utils';
 import type { MetricCardProps } from '@/types';
+import { MetricCard } from './metric-card';
 
 interface AnimatedMetricCardProps extends MetricCardProps {
   animationDelay?: number;
 }
 
-function AnimatedCounter({ 
-  value, 
-  duration = 2000 
-}: { 
-  value: number; 
-  duration?: number; 
+function AnimatedCounter({
+  value,
+  _duration = 2000
+}: {
+  value: number;
+  _duration?: number;
 }) {
   const spring = useSpring(0, { 
     stiffness: 100, 

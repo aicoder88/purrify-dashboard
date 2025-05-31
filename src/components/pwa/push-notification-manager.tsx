@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as React from 'react';
 import { usePWA } from '@/hooks/use-pwa';
 
 const BellIcon = () => (
@@ -10,11 +10,6 @@ const BellIcon = () => (
   </svg>
 );
 
-const BellOffIcon = () => (
-  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 5.586l12.828 12.828M9 21h6m-7-4h8m-8 0V11a6.002 6.002 0 004-5.659V5a2 2 0 114 0v.341C16.67 6.165 18 8.388 18 11v.159" />
-  </svg>
-);
 
 const CheckIcon = () => (
   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +166,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
                   Notifications Enabled!
                 </h3>
                 <p className="text-xs text-white/70">
-                  You'll now receive important updates and alerts
+                  You&apos;ll now receive important updates and alerts
                 </p>
               </div>
             </div>

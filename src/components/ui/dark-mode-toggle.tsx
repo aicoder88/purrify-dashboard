@@ -1,9 +1,9 @@
 'use client';
 
-import * as React from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from './theme-provider';
+import * as React from 'react';
 import { Button } from './button';
+import { useTheme } from './theme-provider';
 
 interface DarkModeToggleProps {
   className?: string;

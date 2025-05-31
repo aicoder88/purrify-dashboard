@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as React from 'react';
 import { useOfflineStatus } from '@/hooks/use-pwa';
 
 const WifiOffIcon = () => (

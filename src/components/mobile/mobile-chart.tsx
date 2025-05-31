@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { motion } from 'framer-motion';
+import * as React from 'react';
 import { useMobileGestures, useHapticFeedback } from '@/hooks/use-mobile-gestures';
 
 interface DataPoint {
@@ -95,7 +95,7 @@ export const MobileChart: React.FC<MobileChartProps> = ({
   };
 
   if (enablePinchZoom) {
-    gestureOptions.onPinch = (newScale: number, center: { x: number; y: number }) => {
+    gestureOptions.onPinch = (newScale: number, _center: { x: number; y: number }) => {
       selectionChanged();
       setScale(Math.max(0.5, Math.min(3, newScale)));
     };

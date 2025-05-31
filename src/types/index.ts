@@ -89,7 +89,7 @@ export interface MetricCardProps {
   } | undefined;
   icon?: React.ReactNode;
   loading?: boolean;
-  className?: string;
+  className?: string | undefined;
   variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
 }
 
