@@ -11,6 +11,9 @@ const protectedRoutes = [
   '/api/settings',
 ];
 
+// Define Tempo routes that should be accessible
+const tempoRoutes = ['/tempobook', '/_tempo'];
+
 // Define public routes that don't require authentication
 const _publicRoutes = [
   '/',
@@ -24,22 +27,30 @@ const _publicRoutes = [
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Check if the route is protected
-  const isProtectedRoute = protectedRoutes.some(route => 
+  const isProtectedRoute = protectedRoutes.some(route =>
     pathname.startsWith(route)
   );
-  
+
+  // Check if the route is a Tempo route
+  const isTempoRoute = tempoRoutes.some(route => pathname.startsWith(route));
+
+  // Allow Tempo routes without authentication
+  if (isTempoRoute) {
+    return NextResponse.next();
+  }
 
   // Get token from cookies or Authorization header
-  const token = request.cookies.get('auth-token')?.value || 
-                request.headers.get('Authorization')?.replace('Bearer ', '');
+  const token =
+    request.cookies.get('auth-token')?.value ||
+    request.headers.get('Authorization')?.replace('Bearer ', '');
 
   // If accessing a protected route
   if (isProtectedRoute) {
     // TEMPORARILY DISABLED FOR DEVELOPMENT - Allow access without authentication
     return NextResponse.next();
-    
+
     // if (!token) {
     //   // Redirect to login if no token
     //   const loginUrl = new URL('/login', request.url);
@@ -74,9 +85,9 @@ export async function middleware(request: NextRequest) {
       const secret = new TextEncoder().encode(
         process.env.JWT_SECRET || 'your-secret-key'
       );
-      
+
       await jwtVerify(token, secret);
-      
+
       // User is authenticated, redirect to dashboard
       return NextResponse.redirect(new URL('/dashboard', request.url));
     } catch (error) {
@@ -90,12 +101,18 @@ export async function middleware(request: NextRequest) {
   // For API routes, add CORS headers
   if (pathname.startsWith('/api/')) {
     const response = NextResponse.next();
-    
+
     // Add CORS headers
     response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
+    response.headers.set(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, OPTIONS'
+    );
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization'
+    );
+
     return response;
   }
 

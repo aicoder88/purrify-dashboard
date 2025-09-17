@@ -3,7 +3,12 @@ const nextConfig = {
   // Enable experimental features
   experimental: {
     // Enable optimized package imports
-    optimizePackageImports: ['lucide-react', 'framer-motion', 'recharts', 'chart.js'],
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      'recharts',
+      'chart.js',
+    ],
     // Enable server components logging
     serverComponentsExternalPackages: ['sharp'],
     // Enable partial prerendering
@@ -22,9 +27,12 @@ const nextConfig = {
   // Compiler options
   compiler: {
     // Remove console.log in production
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
     // Enable emotion for better CSS-in-JS performance
     emotion: true,
   },
@@ -42,10 +50,18 @@ const nextConfig = {
   // Performance optimizations
   poweredByHeader: false,
   compress: true,
-  
 
   // Webpack configuration
   webpack: (config, { dev, isServer }) => {
+    // Add Tempo plugin for development
+    if (dev && !isServer) {
+      try {
+        const { tempo } = require('tempo-devtools/next');
+        config.plugins.push(tempo());
+      } catch (error) {
+        console.warn('Tempo devtools not available:', error.message);
+      }
+    }
     // Optimize bundle size
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
@@ -97,7 +113,6 @@ const nextConfig = {
       test: /\.svg$/,
       use: ['@svgr/webpack'],
     });
-
 
     // Add performance hints
     if (!dev) {
@@ -198,7 +213,7 @@ const nextConfig = {
 
   // Output configuration for deployment
   output: 'standalone',
-  
+
   // Trailing slash configuration
   trailingSlash: false,
 
