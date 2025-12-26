@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Card, CardContent } from './card';
 
@@ -142,12 +143,12 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
                 .map(option => (
                   <span
                     key={option.value}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-teal-50 text-teal-700 text-xs rounded-md"
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 text-xs font-medium rounded-md border border-teal-100 dark:border-teal-800"
                   >
                     {option.label}
                     <button
                       onClick={(e) => removeItem(option.value, e)}
-                      className="hover:bg-teal-100 rounded-full p-0.5"
+                      className="hover:bg-teal-100 dark:hover:bg-teal-800 rounded-full p-0.5 transition-colors"
                     >
                       <XIcon />
                     </button>
@@ -155,12 +156,12 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
                 ))
             )
           ) : (
-            <span className="text-charcoal-900 truncate">
+            <span className="text-charcoal-900 dark:text-neutral-300 truncate font-medium">
               {getDisplayText()}
             </span>
           )}
         </div>
-        <ChevronDownIcon />
+        <ChevronDownIcon className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")} />
       </Button>
 
       <AnimatePresence>
@@ -170,20 +171,20 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 mt-2 z-50"
+            className="absolute top-full left-0 right-0 mt-2 z-[1001]"
           >
-            <Card className="shadow-lg border border-neutral-200">
+            <Card className="shadow-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 overflow-hidden">
               <CardContent className="p-0">
                 {searchable && (
-                  <div className="p-3 border-b border-neutral-200">
+                  <div className="p-3 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
                     <div className="relative">
-                      <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+                      <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
                       <input
                         type="text"
                         placeholder="Search options..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        className="w-full pl-10 pr-3 py-2 text-sm bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-charcoal-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500"
                       />
                     </div>
                   </div>
@@ -191,25 +192,25 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
 
                 <div className="p-2">
                   {/* Select All / Clear All */}
-                  <div className="flex gap-2 mb-2">
+                  <div className="flex gap-2 mb-2 p-1">
                     <button
                       onClick={handleSelectAll}
-                      className="flex-1 px-3 py-1.5 text-xs text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                      className="flex-1 px-3 py-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-md transition-colors"
                     >
                       {allFilteredSelected ? 'Deselect All' : 'Select All'}
                     </button>
                     <button
                       onClick={handleClearAll}
-                      className="flex-1 px-3 py-1.5 text-xs text-neutral-600 hover:bg-neutral-50 rounded-md transition-colors"
+                      className="flex-1 px-3 py-1.5 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-md transition-colors"
                     >
                       Clear All
                     </button>
                   </div>
 
                   {/* Options List */}
-                  <div className="max-h-60 overflow-y-auto">
+                  <div className="max-h-64 overflow-y-auto custom-scrollbar">
                     {filteredOptions.length === 0 ? (
-                      <div className="px-3 py-4 text-center text-sm text-neutral-500">
+                      <div className="px-3 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
                         No options found
                       </div>
                     ) : (
@@ -219,24 +220,26 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
                           <button
                             key={option.value}
                             onClick={() => handleToggleOption(option.value)}
-                            className={`w-full flex items-center justify-between px-3 py-2 text-left text-sm rounded-md transition-colors ${
+                            className={cn(
+                              "w-full flex items-center justify-between px-3 py-2.5 text-left text-sm rounded-md transition-all duration-200 mb-0.5",
                               isSelected
-                                ? 'bg-teal-50 text-teal-700'
-                                : 'hover:bg-neutral-50 text-neutral-700'
-                            }`}
+                                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300'
+                                : 'hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300'
+                            )}
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`w-4 h-4 border rounded flex items-center justify-center ${
+                              <div className={cn(
+                                "w-4 h-4 border rounded flex items-center justify-center transition-colors",
                                 isSelected
                                   ? 'bg-teal-500 border-teal-500 text-white'
-                                  : 'border-neutral-300'
-                              }`}>
+                                  : 'border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800'
+                              )}>
                                 {isSelected && <CheckIcon />}
                               </div>
-                              <span>{option.label}</span>
+                              <span className="font-medium">{option.label}</span>
                             </div>
                             {option.count !== undefined && (
-                              <span className="text-xs text-neutral-500">
+                              <span className="text-xs px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400">
                                 {option.count}
                               </span>
                             )}

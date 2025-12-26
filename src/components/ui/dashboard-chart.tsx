@@ -6,51 +6,14 @@ import {
   LinearScale,
   BarElement,
   Title,
-} from 'chart.js';
-import { motion } from 'framer-motion';
-import * as React from 'react';
-import { Bar } from 'react-chartjs-2';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-);
-
-interface DashboardChartProps {
-  data: {
-    labels: string[];
-    datasets: {
-      label: string;
-      data: number[];
-      backgroundColor: string;
-    }[];
-  };
-  options?: any;
-  className?: string;
-}
-
-export const DashboardChart: React.FC<DashboardChartProps> = ({
-  data,
-  options,
-  className = '',
-}) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`bg-card text-card-foreground rounded-lg shadow-sm p-4 ${className}`}
-    >
-      <Bar data={data} options={options} />
-    </motion.div>
-  );
-};
   Tooltip,
   Legend,
   ChartOptions,
+  ChartData,
+  TooltipItem, // Changed from TooltipContext as it's more specific for label callback
 } from 'chart.js';
+import { motion } from 'framer-motion';
+import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 
@@ -65,14 +28,14 @@ ChartJS.register(
 );
 
 interface DashboardChartProps {
-  data: any;
+  data: ChartData<'bar'>;
   title?: string;
   height?: number;
   loading?: boolean;
   className?: string;
 }
 
-const DashboardChart: React.FC<DashboardChartProps> = ({
+export const DashboardChart: React.FC<DashboardChartProps> = ({
   data,
   title = "Sales Performance",
   height = 300,
@@ -103,7 +66,7 @@ const DashboardChart: React.FC<DashboardChartProps> = ({
         cornerRadius: 8,
         displayColors: true,
         callbacks: {
-          label: function(context) {
+          label: function(context: TooltipItem<'bar'>) {
             return `${context.dataset.label}: ${context.parsed.y}`;
           },
         },
@@ -136,7 +99,7 @@ const DashboardChart: React.FC<DashboardChartProps> = ({
             family: 'Inter, sans-serif',
           },
           color: '#6B7280',
-          callback: function(value) {
+          callback: function(value: string | number) {
             return typeof value === 'number' ? value.toString() : value;
           },
         },
@@ -165,7 +128,7 @@ const DashboardChart: React.FC<DashboardChartProps> = ({
             <CardTitle>{title}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div 
+            <div
               className="flex items-center justify-center bg-neutral-50 rounded-lg animate-pulse"
               style={{ height: `${height}px` }}
             >
@@ -209,4 +172,4 @@ const DashboardChart: React.FC<DashboardChartProps> = ({
   );
 };
 
-export { DashboardChart };
+// The redundant export { DashboardChart }; was removed as the component is now directly exported.

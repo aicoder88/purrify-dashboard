@@ -1,9 +1,9 @@
 'use client';
 
-import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from './card';
+import * as React from 'react';
 import { Button } from './button';
+import { Card, CardContent, CardHeader, CardTitle } from './card';
 
 interface ErrorBoundaryState {
   hasError: boolean;

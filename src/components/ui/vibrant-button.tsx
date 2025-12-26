@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { motion } from 'framer-motion';
+import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface VibrantButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -69,7 +69,7 @@ export function VibrantButton({
   children,
   className,
   disabled,
-  asChild,
+  asChild: _asChild,
   ...props
 }: VibrantButtonProps) {
   const styles = variantStyles[variant];

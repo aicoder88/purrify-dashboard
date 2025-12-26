@@ -1,13 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { PWAStatusIndicator } from '@/components/pwa/pwa-status-indicator';
 import { PullToRefresh } from '@/components/mobile/pull-to-refresh';
-import { cn } from '@/lib/utils';
+import { PWAStatusIndicator } from '@/components/pwa/pwa-status-indicator';
 import type { DashboardLayoutProps } from '@/types';
-import { Header } from './header';
-import { MobileNav } from './mobile-nav';
 import { EnhancedMobileNav } from './enhanced-mobile-nav';
+import { Header } from './header';
 import { Sidebar } from './sidebar';
 
 export function MainLayout({

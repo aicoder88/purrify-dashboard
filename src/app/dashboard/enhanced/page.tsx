@@ -19,6 +19,7 @@ import {
 import { useDashboardData, useRefreshDashboard } from '@/hooks/use-dashboard-data';
 import { useKeyboardShortcuts, createDefaultShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useRealTimeData } from '@/hooks/use-realtime-data';
+import { cn } from '@/lib/utils';
 import { FilterState, type SocialMediaWidget as SocialMediaWidgetType } from '@/types';
 
 // Mock data for demonstration
@@ -174,11 +175,11 @@ function EnhancedDashboardContent() {
     });
   };
 
-  const hasActiveFilters = 
-    filters.dateRange.from || 
-    filters.regions.length > 0 || 
-    filters.storeTypes.length > 0 || 
-    filters.salesReps.length > 0 || 
+  const hasActiveFilters =
+    filters.dateRange.from ||
+    filters.regions.length > 0 ||
+    filters.storeTypes.length > 0 ||
+    filters.salesReps.length > 0 ||
     filters.searchQuery.length > 0;
 
   if (error) {
@@ -248,36 +249,53 @@ function EnhancedDashboardContent() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-charcoal-900 dark:text-white">Enhanced Sales Dashboard</h1>
-          <p className="text-neutral-600 dark:text-neutral-300 mt-2">
-            Advanced analytics with real-time updates and interactive features.
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <DarkModeToggle />
-          
-          {/* Connection Status */}
-          <div className="flex items-center gap-2 text-sm">
-            <div className={`w-2 h-2 rounded-full ${connection.isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-neutral-600 dark:text-neutral-300">
-              {connection.isConnected ? 'Connected' : 'Disconnected'}
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold text-charcoal-900 dark:text-white">Enhanced Sales Dashboard</h1>
+            <span className="px-3 py-1 bg-gradient-to-r from-teal-500 to-primary-500 text-white text-xs font-semibold rounded-full">
+              PRO
             </span>
           </div>
-          
+          <p className="text-neutral-600 dark:text-neutral-300">
+            Advanced analytics with real-time updates, filters, and interactive features.
+          </p>
+          <a
+            href="/dashboard"
+            className="text-sm text-teal-500 hover:text-teal-400 inline-flex items-center gap-1 mt-1"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Basic Dashboard
+          </a>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <DarkModeToggle />
+
+          {/* Connection Status */}
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 shadow-sm">
+            <div className={cn(
+              "w-2 h-2 rounded-full",
+              connection.isConnected ? 'bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-500'
+            )} />
+            <span className="text-xs font-bold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+              {connection.isConnected ? 'Live' : 'Offline'}
+            </span>
+          </div>
+
           <Button
             onClick={handleRefresh}
             disabled={refreshMutation.isPending}
-            className="bg-teal-500 hover:bg-teal-600 text-white"
+            className="bg-teal-500 hover:bg-teal-600 text-white shadow-md shadow-teal-500/20 font-semibold"
           >
             <motion.div
               animate={refreshMutation.isPending ? { rotate: 360 } : { rotate: 0 }}
-              transition={{ duration: 1, repeat: refreshMutation.isPending ? Infinity : 0 }}
+              transition={{ duration: 1, repeat: refreshMutation.isPending ? Infinity : 0, ease: "linear" }}
             >
               <RefreshIcon />
             </motion.div>
             <span className="ml-2">
-              {refreshMutation.isPending ? 'Refreshing...' : 'Refresh Data'}
+              {refreshMutation.isPending ? 'Syncing...' : 'Refresh Data'}
             </span>
           </Button>
         </div>
@@ -304,28 +322,28 @@ function EnhancedDashboardContent() {
             </Button>
           )}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <EnhancedDateRangePicker
             value={filters.dateRange}
             onChange={(range) => setFilters(prev => ({ ...prev, dateRange: range }))}
             placeholder="Select date range"
           />
-          
+
           <MultiSelectFilter
             options={regionOptions}
             value={filters.regions}
             onChange={(regions) => setFilters(prev => ({ ...prev, regions }))}
             placeholder="Select regions"
           />
-          
+
           <MultiSelectFilter
             options={storeTypeOptions}
             value={filters.storeTypes}
             onChange={(storeTypes) => setFilters(prev => ({ ...prev, storeTypes }))}
             placeholder="Select store types"
           />
-          
+
           <MultiSelectFilter
             options={salesRepOptions}
             value={filters.salesReps}
@@ -359,7 +377,7 @@ function EnhancedDashboardContent() {
           animated={true}
           exportable={true}
         />
-        
+
         <EnhancedChart
           data={pieChartData}
           type="pie"
@@ -382,12 +400,88 @@ function EnhancedDashboardContent() {
             exportable={true}
           />
         </div>
-        
+
         <SocialMediaWidget
           data={mockSocialData}
           loading={false}
         />
       </div>
+
+      {/* Recent Activity Table */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
+        className="glass rounded-xl border border-glass-border overflow-hidden"
+      >
+        <div className="p-6 border-b border-glass-border">
+          <h3 className="text-lg font-semibold text-charcoal-900 dark:text-white">Recent Activity</h3>
+          <p className="text-sm text-neutral-600 dark:text-neutral-300 mt-1">Latest sales interactions and updates</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-neutral-50 dark:bg-neutral-800/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
+                  Store Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
+                  Location
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
+                  Sales Rep
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
+                  Date
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-700">
+              {[
+                { store: 'Paws & Claws Pet Store', location: 'Vancouver, BC', status: 'Sample Delivered', rep: 'Sarah Mitchell', date: '2 hours ago', statusColor: 'bg-secondary-500' },
+                { store: 'Happy Tails Veterinary', location: 'Toronto, ON', status: 'First Purchase', rep: 'John Davis', date: '5 hours ago', statusColor: 'bg-success-500' },
+                { store: 'Furry Friends Supply', location: 'Calgary, AB', status: 'Repeat Order', rep: 'Emily Rodriguez', date: '1 day ago', statusColor: 'bg-warning-500' },
+                { store: 'Pet Paradise', location: 'Montreal, QC', status: 'Contacted', rep: 'Michael Chen', date: '1 day ago', statusColor: 'bg-primary-500' },
+                { store: 'The Pet Boutique', location: 'Edmonton, AB', status: 'Sample Delivered', rep: 'Lisa Wilson', date: '2 days ago', statusColor: 'bg-secondary-500' },
+              ].map((activity, index) => (
+                <motion.tr
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 * index }}
+                  className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-charcoal-900 dark:text-white">{activity.store}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-neutral-600 dark:text-neutral-300">{activity.location}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${activity.statusColor}`}>
+                      {activity.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-neutral-600 dark:text-neutral-300">{activity.rep}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">{activity.date}</div>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="p-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700 text-center">
+          <button className="text-sm text-teal-500 hover:text-teal-400 font-medium">
+            View All Activity →
+          </button>
+        </div>
+      </motion.div>
 
       {/* Real-time Updates Info */}
       {lastUpdate && (
@@ -413,7 +507,7 @@ function EnhancedDashboardContent() {
         className="text-center text-sm text-neutral-500 dark:text-neutral-400"
       >
         <p>
-          Press <kbd className="px-2 py-1 bg-neutral-100 dark:bg-neutral-700 rounded text-xs">Ctrl+R</kbd> to refresh, 
+          Press <kbd className="px-2 py-1 bg-neutral-100 dark:bg-neutral-700 rounded text-xs">Ctrl+R</kbd> to refresh,
           <kbd className="px-2 py-1 bg-neutral-100 dark:bg-neutral-700 rounded text-xs ml-1">Ctrl+Shift+D</kbd> to toggle dark mode
         </p>
       </motion.div>

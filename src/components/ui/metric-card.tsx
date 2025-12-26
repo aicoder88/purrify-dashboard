@@ -1,8 +1,7 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
-import { formatNumber, formatPercentage } from "@/lib/utils";
-import { MetricCard as BaseMetricCard } from "./card";
+import { cn, formatNumber, formatPercentage } from "@/lib/utils";
 import type { MetricCardProps } from "@/types";
+import { MetricCard as BaseMetricCard } from "./card";
 
 const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
   ({

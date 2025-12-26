@@ -2,7 +2,7 @@
 
 import { motion, useSpring, useTransform } from 'framer-motion';
 import * as React from 'react';
-import { cn, formatNumber as _formatNumber, formatPercentage as _formatPercentage } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { MetricCardProps } from '@/types';
 import { MetricCard } from './metric-card';
 

@@ -47,12 +47,7 @@ function getRating(name: keyof typeof THRESHOLDS, value: number): 'good' | 'need
  * Send metric to analytics service
  */
 function sendToAnalytics(metric: PerformanceMetric) {
-  // In production, send to your analytics service
-  if (process.env.NODE_ENV === 'development') {
-    console.log('📊 Performance Metric:', metric);
-  }
-  
-  // Example: Send to Google Analytics 4
+  // Send to Google Analytics 4 if available
   if (typeof gtag !== 'undefined') {
     gtag('event', metric.name, {
       custom_parameter_1: metric.value,
@@ -262,15 +257,14 @@ export function withPerformanceMonitoring<P extends object>(
   componentName: string
 ) {
   return function PerformanceMonitoredComponent(props: P) {
-    const monitor = PerformanceMonitor.getInstance();
-    
     React.useEffect(() => {
+      const monitor = PerformanceMonitor.getInstance();
       monitor.startMeasure(`${componentName}_mount`);
       return () => {
         monitor.endMeasure(`${componentName}_mount`);
       };
     }, []);
-    
+
     return React.createElement(Component, props);
   };
 }

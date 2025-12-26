@@ -1,7 +1,9 @@
 'use client';
 
-import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import * as React from 'react';
 import {
   LineChart,
   Line,
@@ -19,11 +21,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { Card, CardContent, CardHeader, CardTitle } from './card';
-import { Button } from './button';
 import { ChartDataPoint, ChartExportOptions, ChartDrillDownData } from '@/types';
+import { Button } from './button';
+import { Card, CardContent, CardHeader, CardTitle } from './card';
 
 interface EnhancedChartProps {
   data: ChartDataPoint[];
@@ -70,7 +70,7 @@ const EnhancedChart: React.FC<EnhancedChartProps> = ({
   animated = true,
   exportable = true,
   drillDownEnabled = false,
-  onDrillDown,
+  onDrillDown: _onDrillDown,
   className = '',
   colors = PURRIFY_COLORS,
   loading = false,
@@ -131,16 +131,17 @@ const EnhancedChart: React.FC<EnhancedChartProps> = ({
     }
   };
 
-  const handleDataPointClick = (data: any) => {
-    if (drillDownEnabled && onDrillDown) {
-      const drillDownData: ChartDrillDownData = {
-        level: 1,
-        data: [data],
-        breadcrumb: [title, data.label || data.x],
-      };
-      onDrillDown(drillDownData);
-    }
-  };
+  // Data point click handler - available for future drill-down implementation
+  // const handleDataPointClick = (data: ChartDataPoint) => {
+  //   if (drillDownEnabled && _onDrillDown) {
+  //     const drillDownData: ChartDrillDownData = {
+  //       level: 1,
+  //       data: [data],
+  //       breadcrumb: [title, data.label || String(data.x)],
+  //     };
+  //     _onDrillDown(drillDownData);
+  //   }
+  // };
 
   const renderChart = () => {
     const commonProps = {

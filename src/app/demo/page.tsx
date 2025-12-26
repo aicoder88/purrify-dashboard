@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input, SearchInput, PasswordInput } from '@/components/ui/input';
 import {
   Card,
   CardHeader,
@@ -13,6 +12,7 @@ import {
   GlowCard,
   FeatureCard
 } from '@/components/ui/card';
+import { Input, SearchInput, PasswordInput } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 
 // Demo Icons

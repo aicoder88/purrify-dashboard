@@ -28,11 +28,12 @@ export const OfflineIndicator: React.FC = () => {
   const [showReconnected, setShowReconnected] = React.useState(false);
 
   React.useEffect(() => {
-    if (isOnline && wasOffline) {
-      setShowReconnected(true);
-      const timer = setTimeout(() => setShowReconnected(false), 3000);
-      return () => clearTimeout(timer);
+    if (!isOnline || !wasOffline) {
+      return;
     }
+    setShowReconnected(true);
+    const timer = setTimeout(() => setShowReconnected(false), 3000);
+    return () => clearTimeout(timer);
   }, [isOnline, wasOffline]);
 
   return (
@@ -48,7 +49,7 @@ export const OfflineIndicator: React.FC = () => {
         >
           <div className="flex items-center justify-center gap-2 px-4 py-2 text-white text-sm font-medium">
             <WifiOffIcon />
-            <span>You're offline. Some features may be limited.</span>
+            <span>You&apos;re offline. Some features may be limited.</span>
             <div className="ml-2 flex gap-1">
               <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
               <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '200ms' }} />

@@ -284,13 +284,10 @@ export class QueryCache {
       return;
     }
 
-    // Invalidate keys matching pattern
-    const regex = new RegExp(pattern);
-    const keysToDelete: string[] = [];
-
-    // Note: MemoryCache doesn't expose keys(), so we'll need to track them
-    // This is a simplified implementation
-    this.cache.clear(); // For now, clear all
+    // Note: MemoryCache doesn't expose keys(), so we can't do pattern matching.
+    // For now, clear all cache when a pattern is provided.
+    // TODO: Add keys() method to MemoryCache for proper pattern-based invalidation
+    this.cache.clear();
   }
 
   prefetch<T>(key: string, fetcher: () => Promise<T>): void {
@@ -312,16 +309,18 @@ export class ImageCache {
 
   async load(src: string): Promise<HTMLImageElement> {
     // Return cached image if available
-    if (this.cache.has(src)) {
-      return this.cache.get(src)!;
+    const cachedImage = this.cache.get(src);
+    if (cachedImage) {
+      return cachedImage;
     }
 
     // Return existing promise if already loading
     if (this.loading.has(src)) {
       return new Promise((resolve, reject) => {
         const checkLoaded = () => {
-          if (this.cache.has(src)) {
-            resolve(this.cache.get(src)!);
+          const loadedImage = this.cache.get(src);
+          if (loadedImage) {
+            resolve(loadedImage);
           } else if (!this.loading.has(src)) {
             reject(new Error('Image loading failed'));
           } else {
@@ -462,7 +461,7 @@ export function initCacheCleanup(): void {
       
       if (usageRatio > 0.8) {
         imageCache.clear();
-        console.log('Cleared image cache due to high memory usage');
+        // Image cache cleared due to high memory usage
       }
     }, 30 * 1000);
   }

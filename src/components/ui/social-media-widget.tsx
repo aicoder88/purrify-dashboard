@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
+import * as React from 'react';
 import { SocialMediaPost, type SocialMediaWidget as SocialMediaWidgetType } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 
@@ -92,10 +93,10 @@ const getPlatformColor = (platform: SocialMediaPost['platform']) => {
 
 const formatNumber = (num: number) => {
   if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
+    return `${(num / 1000000).toFixed(1)  }M`;
   }
   if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
+    return `${(num / 1000).toFixed(1)  }K`;
   }
   return num.toString();
 };
@@ -215,11 +216,12 @@ const SocialMediaWidget: React.FC<SocialMediaWidgetProps> = ({
                 </div>
                 
                 {post.imageUrl && (
-                  <div className="mb-3">
-                    <img
+                  <div className="mb-3 relative h-32 w-full">
+                    <Image
                       src={post.imageUrl}
                       alt="Post image"
-                      className="w-full h-32 object-cover rounded-md"
+                      fill
+                      className="object-cover rounded-md"
                     />
                   </div>
                 )}

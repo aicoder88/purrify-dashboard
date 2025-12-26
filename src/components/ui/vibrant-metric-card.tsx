@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { motion } from 'framer-motion';
+import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface VibrantMetricCardProps {
@@ -67,24 +67,26 @@ export function VibrantMetricCard({
   // Animate the value counting up
   React.useEffect(() => {
     const numericValue = typeof value === 'string' ? parseInt(value.replace(/\D/g, '')) : value;
-    if (typeof numericValue === 'number' && !isNaN(numericValue)) {
-      const duration = 1500;
-      const steps = 60;
-      const increment = numericValue / steps;
-      let current = 0;
-      
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= numericValue) {
-          setAnimatedValue(numericValue);
-          clearInterval(timer);
-        } else {
-          setAnimatedValue(Math.floor(current));
-        }
-      }, duration / steps);
-
-      return () => clearInterval(timer);
+    if (typeof numericValue !== 'number' || isNaN(numericValue)) {
+      return;
     }
+
+    const duration = 1500;
+    const steps = 60;
+    const increment = numericValue / steps;
+    let current = 0;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= numericValue) {
+        setAnimatedValue(numericValue);
+        clearInterval(timer);
+      } else {
+        setAnimatedValue(Math.floor(current));
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
   }, [value]);
 
   const formatValue = (val: string | number) => {

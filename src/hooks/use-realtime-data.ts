@@ -19,9 +19,12 @@ interface UseRealTimeDataReturn {
   reconnect: () => void;
 }
 
+// Event callback type
+type EventCallback = (...args: unknown[]) => void;
+
 // Simulated WebSocket for demo purposes
 class MockWebSocket {
-  private listeners: { [key: string]: Function[] } = {};
+  private listeners: { [key: string]: EventCallback[] } = {};
   private intervalId: NodeJS.Timeout | null = null;
   public isConnected = false;
 
@@ -34,14 +37,14 @@ class MockWebSocket {
     }, 1000);
   }
 
-  addEventListener(event: string, callback: Function) {
+  addEventListener(event: string, callback: EventCallback) {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
     this.listeners[event].push(callback);
   }
 
-  removeEventListener(event: string, callback: Function) {
+  removeEventListener(event: string, callback: EventCallback) {
     if (this.listeners[event]) {
       this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
     }

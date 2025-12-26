@@ -219,8 +219,8 @@ export class AnalyticsManager {
 
     // Initialize gtag
     (window as any).dataLayer = (window as any).dataLayer || [];
-    (window as any).gtag = function() {
-      (window as any).dataLayer.push(arguments);
+    (window as any).gtag = function(...args: unknown[]) {
+      (window as any).dataLayer.push(args);
     };
 
     gtag('js', new Date());
@@ -242,8 +242,8 @@ export class AnalyticsManager {
 
   private initializeHotjar(siteId: string): void {
     // Load Hotjar script
-    (window as any).hj = (window as any).hj || function() {
-      ((window as any).hj.q = (window as any).hj.q || []).push(arguments);
+    (window as any).hj = (window as any).hj || function(...args: unknown[]) {
+      ((window as any).hj.q = (window as any).hj.q || []).push(args);
     };
     (window as any)._hjSettings = { hjid: siteId, hjsv: 6 };
 

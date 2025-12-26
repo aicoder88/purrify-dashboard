@@ -11,8 +11,10 @@ const protectedRoutes = [
   '/api/settings',
 ];
 
-// Define public routes that don't require authentication
-const _publicRoutes = [
+// Public routes that don't require authentication
+// Note: Currently not used since auth is disabled for development.
+// Uncomment the auth logic in the middleware function to use this.
+const publicRoutes = [
   '/',
   '/login',
   '/register',
@@ -20,7 +22,10 @@ const _publicRoutes = [
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/forgot-password',
-];
+] as const;
+
+// Suppress unused variable warning - will be used when auth is re-enabled
+void publicRoutes;
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

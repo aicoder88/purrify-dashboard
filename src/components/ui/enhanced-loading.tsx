@@ -1,7 +1,7 @@
 'use client';
 
+import { Loader2, WifiOff } from 'lucide-react';
 import React from 'react';
-import { Loader2, Wifi, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LoadingSpinnerProps {
@@ -352,7 +352,7 @@ export function ConnectionStatus() {
     <div className="fixed top-0 left-0 right-0 bg-red-600 text-white text-center py-2 z-50">
       <div className="flex items-center justify-center space-x-2">
         <WifiOff className="h-4 w-4" />
-        <span className="text-sm font-medium">You're offline</span>
+        <span className="text-sm font-medium">You&apos;re offline</span>
       </div>
     </div>
   );
