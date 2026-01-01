@@ -335,7 +335,7 @@ describe('StatCard Component', () => {
   });
 
   it('should render StatCard without trend', () => {
-    const { container } = render(<StatCard title="No Trend" value={200} />);
+    render(<StatCard title="No Trend" value={200} />);
 
     expect(screen.getByText('No Trend')).toBeInTheDocument();
     expect(screen.getByText('200')).toBeInTheDocument();

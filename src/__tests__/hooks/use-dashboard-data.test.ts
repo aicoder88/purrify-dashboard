@@ -7,15 +7,15 @@
  * - useRealTimeUpdates: Real-time updates simulation
  */
 
-import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import {
   useDashboardData,
   useRefreshDashboard,
   useRealTimeUpdates,
+  type DashboardData,
 } from '@/hooks/use-dashboard-data';
-import type { DashboardData } from '@/hooks/use-dashboard-data';
 
 // Mock fetch globally
 const mockFetch = jest.fn();

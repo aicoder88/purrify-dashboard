@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateCSVFile, CSVRowSchema } from '@/lib/validation';
 import { z } from 'zod';
+import { validateCSVFile, CSVRowSchema } from '@/lib/validation';
 
 interface ParsedCSVRow {
   storeName: string;

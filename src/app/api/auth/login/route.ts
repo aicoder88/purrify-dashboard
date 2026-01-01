@@ -1,7 +1,7 @@
 import { SignJWT } from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
-import type { User } from '@/types';
 import { LoginSchema, validateInput } from '@/lib/validation';
+import type { User } from '@/types';
 
 // Mock user data - replace with actual database query
 const mockUsers: User[] = [
