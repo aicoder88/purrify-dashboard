@@ -4,11 +4,26 @@ import { motion } from 'framer-motion';
 import * as React from 'react';
 import { useMobileGestures, useHapticFeedback } from '@/hooks/use-mobile-gestures';
 
-interface DataPoint {
+export interface DataPoint {
   x: number;
   y: number;
   label: string;
   value: number;
+}
+
+interface TapPoint {
+  x: number;
+  y: number;
+}
+
+interface SwipeGesture {
+  direction: 'left' | 'right' | 'up' | 'down';
+}
+
+interface GestureOptions {
+  onTap?: (point: TapPoint) => void;
+  onPinch?: (scale: number, center: { x: number; y: number }) => void;
+  onSwipe?: (gesture: SwipeGesture) => void;
 }
 
 interface MobileChartProps {
@@ -60,29 +75,29 @@ export const MobileChart: React.FC<MobileChartProps> = ({
   }).join(' ');
 
   // Handle touch interactions
-  const gestureOptions: any = {
-    onTap: (point: any) => {
+  const gestureOptions: GestureOptions = {
+    onTap: (point: TapPoint) => {
       if (!chartRef.current) return;
-      
+
       const rect = chartRef.current.getBoundingClientRect();
       const x = point.x - rect.left;
       const y = point.y - rect.top;
-      
+
       // Find closest data point
       let closestPoint: DataPoint | null = null;
       let minDistance = Infinity;
-      
-      data.forEach(dataPoint => {
+
+      data.forEach((dataPoint) => {
         const pointX = xScale(dataPoint.x) * scale + panOffset.x;
         const pointY = yScale(dataPoint.y) * scale + panOffset.y;
         const distance = Math.sqrt(Math.pow(x - pointX, 2) + Math.pow(y - pointY, 2));
-        
+
         if (distance < 30 && distance < minDistance) {
           minDistance = distance;
           closestPoint = dataPoint;
         }
       });
-      
+
       if (closestPoint) {
         lightImpact();
         setSelectedPoint(closestPoint);
@@ -102,12 +117,12 @@ export const MobileChart: React.FC<MobileChartProps> = ({
   }
 
   if (enablePan) {
-    gestureOptions.onSwipe = (gesture: any) => {
+    gestureOptions.onSwipe = (gesture: SwipeGesture) => {
       if (gesture.direction === 'left' || gesture.direction === 'right') {
         const deltaX = gesture.direction === 'left' ? -20 : 20;
-        setPanOffset(prev => ({
+        setPanOffset((prev) => ({
           ...prev,
-          x: Math.max(-100, Math.min(100, prev.x + deltaX))
+          x: Math.max(-100, Math.min(100, prev.x + deltaX)),
         }));
       }
     };

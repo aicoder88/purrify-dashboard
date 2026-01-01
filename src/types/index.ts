@@ -117,7 +117,7 @@ export interface Column<T> {
   title: string;
   sortable?: boolean;
   filterable?: boolean;
-  render?: (value: any, record: T) => React.ReactNode;
+  render?: (value: T[keyof T], record: T) => React.ReactNode;
   width?: string | number;
   align?: 'left' | 'center' | 'right';
 }
@@ -194,7 +194,7 @@ export interface ApiResponse<T> {
 export interface ApiError {
   code: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -204,7 +204,7 @@ export interface PaginationParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   search?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, string | number | boolean>;
 }
 
 export interface PaginatedResponse<T> {
@@ -352,7 +352,7 @@ export type FilterOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contai
 export interface Filter {
   field: string;
   operator: FilterOperator;
-  value: any;
+  value: string | number | boolean | Date;
 }
 
 export interface Sort {
@@ -364,7 +364,7 @@ export interface Sort {
 
 export interface AnalyticsEvent {
   event: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, string | number | boolean>;
   timestamp?: Date;
   userId?: string;
 }
@@ -406,7 +406,7 @@ export interface ChartDrillDownData {
 export interface RealTimeUpdate {
   type: 'metric' | 'chart' | 'notification';
   id: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: Date;
 }
 
@@ -466,7 +466,7 @@ export interface WidgetConfig {
   id: string;
   type: 'metric' | 'chart' | 'table' | 'social';
   position: { x: number; y: number; w: number; h: number };
-  config: Record<string, any>;
+  config: Record<string, string | number | boolean | null>;
 }
 
 export interface PerformanceMetrics {

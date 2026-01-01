@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { HealthCheckSchema, validateInput } from '@/lib/validation';
 
 interface HealthCheckResponse {
   status: 'healthy' | 'unhealthy';
@@ -27,20 +28,22 @@ interface HealthCheckResponse {
  */
 export async function GET(_request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  
+
   try {
     // Basic health checks
     const checks = await performHealthChecks();
-    
+
     // Memory usage (if available)
     const memoryUsage = getMemoryUsage();
-    
+
     // Calculate response time
     const responseTime = Date.now() - startTime;
-    
+
     // Determine overall status
-    const isHealthy = Object.values(checks).every(check => check === 'healthy');
-    
+    const isHealthy = Object.values(checks).every(
+      (check) => check === 'healthy'
+    );
+
     const healthResponse: HealthCheckResponse = {
       status: isHealthy ? 'healthy' : 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -56,19 +59,18 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
 
     // Return appropriate status code
     const statusCode = isHealthy ? 200 : 503;
-    
-    return NextResponse.json(healthResponse, { 
+
+    return NextResponse.json(healthResponse, {
       status: statusCode,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     });
-    
   } catch (error) {
     console.error('Health check failed:', error);
-    
+
     const errorResponse: HealthCheckResponse = {
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -85,13 +87,13 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
         responseTime: Date.now() - startTime,
       },
     };
-    
-    return NextResponse.json(errorResponse, { 
+
+    return NextResponse.json(errorResponse, {
       status: 503,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     });
   }
@@ -167,7 +169,7 @@ function getMemoryUsage() {
     const usage = process.memoryUsage();
     const totalMemory = usage.heapTotal + usage.external;
     const usedMemory = usage.heapUsed;
-    
+
     return {
       used: Math.round(usedMemory / 1024 / 1024), // MB
       total: Math.round(totalMemory / 1024 / 1024), // MB
@@ -185,7 +187,17 @@ function getMemoryUsage() {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
-    const { includeDetails = false } = body;
+
+    // Validate input with Zod
+    const validation = validateInput(HealthCheckSchema, body);
+    if (!validation.success || !validation.data) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const { includeDetails } = validation.data;
 
     if (!includeDetails) {
       return GET(request);
@@ -195,9 +207,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const startTime = Date.now();
     const checks = await performHealthChecks();
     const memoryUsage = getMemoryUsage();
-    
+
     const detailedResponse = {
-      status: Object.values(checks).every(check => check === 'healthy') ? 'healthy' : 'unhealthy',
+      status: Object.values(checks).every((check) => check === 'healthy')
+        ? 'healthy'
+        : 'unhealthy',
       timestamp: new Date().toISOString(),
       version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
       environment: process.env.NODE_ENV || 'development',
@@ -217,23 +231,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       features: {
         pwa: process.env.NEXT_PUBLIC_ENABLE_PWA === 'true',
         analytics: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true',
-        performanceMonitoring: process.env.NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING === 'true',
-        errorReporting: process.env.NEXT_PUBLIC_ENABLE_ERROR_REPORTING === 'true',
+        performanceMonitoring:
+          process.env.NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING === 'true',
+        errorReporting:
+          process.env.NEXT_PUBLIC_ENABLE_ERROR_REPORTING === 'true',
       },
     };
 
     return NextResponse.json(detailedResponse, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     });
-
   } catch (error) {
     console.error('Detailed health check failed:', error);
     return NextResponse.json(
-      { error: 'Health check failed', message: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Health check failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

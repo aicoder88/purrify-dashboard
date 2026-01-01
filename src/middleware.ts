@@ -42,35 +42,32 @@ export async function middleware(request: NextRequest) {
 
   // If accessing a protected route
   if (isProtectedRoute) {
-    // TEMPORARILY DISABLED FOR DEVELOPMENT - Allow access without authentication
-    return NextResponse.next();
-    
-    // if (!token) {
-    //   // Redirect to login if no token
-    //   const loginUrl = new URL('/login', request.url);
-    //   loginUrl.searchParams.set('redirect', pathname);
-    //   return NextResponse.redirect(loginUrl);
-    // }
+    if (!token) {
+      // Redirect to login if no token
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
 
-    // try {
-    //   // Verify JWT token
-    //   const secret = new TextEncoder().encode(
-    //     process.env.JWT_SECRET || 'your-secret-key'
-    //   );
-    //
-    //   await jwtVerify(token, secret);
-    //
-    //   // Token is valid, continue to the route
-    //   return NextResponse.next();
-    // } catch (error) {
-    //   // Token is invalid, redirect to login
-    //   const loginUrl = new URL('/login', request.url);
-    //   loginUrl.searchParams.set('redirect', pathname);
-    //
-    //   const response = NextResponse.redirect(loginUrl);
-    //   response.cookies.delete('auth-token');
-    //   return response;
-    // }
+    try {
+      // Verify JWT token
+      const secret = new TextEncoder().encode(
+        process.env.JWT_SECRET || 'your-secret-key'
+      );
+
+      await jwtVerify(token, secret);
+
+      // Token is valid, continue to the route
+      return NextResponse.next();
+    } catch {
+      // Token is invalid, redirect to login
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+
+      const response = NextResponse.redirect(loginUrl);
+      response.cookies.delete('auth-token');
+      return response;
+    }
   }
 
   // If accessing login/register while authenticated
@@ -95,12 +92,24 @@ export async function middleware(request: NextRequest) {
   // For API routes, add CORS headers
   if (pathname.startsWith('/api/')) {
     const response = NextResponse.next();
-    
-    // Add CORS headers
-    response.headers.set('Access-Control-Allow-Origin', '*');
+
+    // Allowed origins for CORS
+    const allowedOrigins = [
+      'https://dashboard.purrify.ca',
+      'https://purrify.ca',
+      'https://www.purrify.ca',
+      process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '',
+    ].filter(Boolean);
+
+    const origin = request.headers.get('origin');
+    const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
+    // Add CORS headers with restricted origins
+    response.headers.set('Access-Control-Allow-Origin', allowedOrigin || '');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+
     return response;
   }
 

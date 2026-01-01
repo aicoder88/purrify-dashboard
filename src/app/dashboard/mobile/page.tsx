@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import * as React from 'react';
 import { NewMainLayout } from '@/components/layout/new-main-layout';
-import { MobileChart } from '@/components/mobile/mobile-chart';
+import { MobileChart, DataPoint } from '@/components/mobile/mobile-chart';
 import { MobileDatePicker } from '@/components/mobile/mobile-date-picker';
 import { Card } from '@/components/ui/card';
 import { useHapticFeedback } from '@/hooks/use-mobile-gestures';
@@ -56,10 +56,10 @@ const MetricCard = ({ title, value, change, icon }: {
 
 export default function MobileDashboardPage() {
   const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
-  const [selectedDataPoint, setSelectedDataPoint] = React.useState<any>(null);
+  const [selectedDataPoint, setSelectedDataPoint] = React.useState<DataPoint | null>(null);
   const { mediumImpact } = useHapticFeedback();
 
-  const handleDataPointTap = (point: any) => {
+  const handleDataPointTap = (point: DataPoint) => {
     setSelectedDataPoint(point);
     mediumImpact();
   };

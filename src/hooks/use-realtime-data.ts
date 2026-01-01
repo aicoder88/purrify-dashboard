@@ -14,13 +14,23 @@ interface UseRealTimeDataOptions {
 interface UseRealTimeDataReturn {
   connection: WebSocketConnection;
   lastUpdate: RealTimeUpdate | null;
-  sendMessage: (message: any) => void;
+  sendMessage: (message: Record<string, unknown>) => void;
   disconnect: () => void;
   reconnect: () => void;
 }
 
 // Event callback type
 type EventCallback = (...args: unknown[]) => void;
+
+// WebSocket message event type
+interface WebSocketMessageEvent {
+  data: string;
+}
+
+// WebSocket error event type
+interface WebSocketErrorEvent {
+  message?: string;
+}
 
 // Simulated WebSocket for demo purposes
 class MockWebSocket {
@@ -46,7 +56,7 @@ class MockWebSocket {
 
   removeEventListener(event: string, callback: EventCallback) {
     if (this.listeners[event]) {
-      this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+      this.listeners[event] = this.listeners[event].filter((cb) => cb !== callback);
     }
   }
 
@@ -64,9 +74,9 @@ class MockWebSocket {
     this.emit('close', {});
   }
 
-  private emit(event: string, data: any) {
+  private emit(event: string, data: unknown) {
     if (this.listeners[event]) {
-      this.listeners[event].forEach(callback => callback(data));
+      this.listeners[event].forEach((callback) => callback(data));
     }
   }
 
@@ -77,7 +87,7 @@ class MockWebSocket {
 
       const updateTypes = ['metric', 'chart', 'notification'] as const;
       const randomType = updateTypes[Math.floor(Math.random() * updateTypes.length)];
-      
+
       let updateData: RealTimeUpdate;
 
       switch (randomType) {
@@ -149,7 +159,9 @@ class MockWebSocket {
   }
 }
 
-export const useRealTimeData = (options: UseRealTimeDataOptions = {}): UseRealTimeDataReturn => {
+export const useRealTimeData = (
+  options: UseRealTimeDataOptions = {}
+): UseRealTimeDataReturn => {
   const {
     endpoint = '/api/realtime',
     reconnectInterval = 5000,
@@ -167,26 +179,33 @@ export const useRealTimeData = (options: UseRealTimeDataOptions = {}): UseRealTi
   const wsRef = React.useRef<MockWebSocket | null>(null);
   const reconnectTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  const updateConnection = React.useCallback((updates: Partial<WebSocketConnection>) => {
-    setConnection(prev => {
-      const newConnection = { ...prev, ...updates };
-      onConnectionChange?.(newConnection);
-      return newConnection;
-    });
-  }, [onConnectionChange]);
+  const updateConnection = React.useCallback(
+    (updates: Partial<WebSocketConnection>) => {
+      setConnection((prev) => {
+        const newConnection = { ...prev, ...updates };
+        onConnectionChange?.(newConnection);
+        return newConnection;
+      });
+    },
+    [onConnectionChange]
+  );
 
-  const handleMessage = React.useCallback((event: any) => {
-    try {
-      const update: RealTimeUpdate = JSON.parse(event.data);
-      setLastUpdate(update);
-      onUpdate?.(update);
-      
-      // Update last heartbeat
-      updateConnection({ lastHeartbeat: new Date() });
-    } catch (error) {
-      console.error('Failed to parse WebSocket message:', error);
-    }
-  }, [onUpdate, updateConnection]);
+  const handleMessage = React.useCallback(
+    (event: unknown) => {
+      try {
+        const messageEvent = event as WebSocketMessageEvent;
+        const update: RealTimeUpdate = JSON.parse(messageEvent.data);
+        setLastUpdate(update);
+        onUpdate?.(update);
+
+        // Update last heartbeat
+        updateConnection({ lastHeartbeat: new Date() });
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error);
+      }
+    },
+    [onUpdate, updateConnection]
+  );
 
   const handleOpen = React.useCallback(() => {
     updateConnection({
@@ -197,15 +216,18 @@ export const useRealTimeData = (options: UseRealTimeDataOptions = {}): UseRealTi
   }, [updateConnection]);
 
   const handleClose = React.useCallback(() => {
-    setConnection(prev => {
+    setConnection((prev) => {
       const newConnection = { ...prev, isConnected: false };
       onConnectionChange?.(newConnection);
-      
+
       // Attempt to reconnect if we haven't exceeded max attempts
       if (prev.reconnectAttempts < maxReconnectAttempts) {
         reconnectTimeoutRef.current = setTimeout(() => {
-          setConnection(current => {
-            const updatedConnection = { ...current, reconnectAttempts: current.reconnectAttempts + 1 };
+          setConnection((current) => {
+            const updatedConnection = {
+              ...current,
+              reconnectAttempts: current.reconnectAttempts + 1,
+            };
             onConnectionChange?.(updatedConnection);
             return updatedConnection;
           });
@@ -213,17 +235,21 @@ export const useRealTimeData = (options: UseRealTimeDataOptions = {}): UseRealTi
           setTimeout(() => connectRef.current?.(), 0);
         }, reconnectInterval);
       }
-      
+
       return newConnection;
     });
   }, [maxReconnectAttempts, reconnectInterval, onConnectionChange]);
 
-  const handleError = React.useCallback((error: any) => {
-    updateConnection({ 
-      error: error.message || 'WebSocket connection error',
-      isConnected: false,
-    });
-  }, [updateConnection]);
+  const handleError = React.useCallback(
+    (error: unknown) => {
+      const errorEvent = error as WebSocketErrorEvent;
+      updateConnection({
+        error: errorEvent.message || 'WebSocket connection error',
+        isConnected: false,
+      });
+    },
+    [updateConnection]
+  );
 
   const connectRef = React.useRef<() => void>();
 
@@ -236,12 +262,12 @@ export const useRealTimeData = (options: UseRealTimeDataOptions = {}): UseRealTi
       // In a real implementation, this would be a real WebSocket
       // const ws = new WebSocket(`ws://localhost:3000${endpoint}`);
       const ws = new MockWebSocket(`ws://localhost:3000${endpoint}`);
-      
+
       ws.addEventListener('open', handleOpen);
       ws.addEventListener('message', handleMessage);
       ws.addEventListener('close', handleClose);
       ws.addEventListener('error', handleError);
-      
+
       wsRef.current = ws;
     } catch (error) {
       handleError(error);
@@ -256,12 +282,12 @@ export const useRealTimeData = (options: UseRealTimeDataOptions = {}): UseRealTi
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-    
+
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
-    
+
     updateConnection({ isConnected: false, reconnectAttempts: 0 });
   }, [updateConnection]);
 
@@ -271,19 +297,23 @@ export const useRealTimeData = (options: UseRealTimeDataOptions = {}): UseRealTi
     connect();
   }, [disconnect, connect, updateConnection]);
 
-  const sendMessage = React.useCallback((message: any) => {
-    if (wsRef.current && connection.isConnected) {
-      wsRef.current.send(JSON.stringify(message));
-    }
-  }, [connection.isConnected]);
+  const sendMessage = React.useCallback(
+    (message: Record<string, unknown>) => {
+      if (wsRef.current && connection.isConnected) {
+        wsRef.current.send(JSON.stringify(message));
+      }
+    },
+    [connection.isConnected]
+  );
 
   // Initialize connection on mount
   React.useEffect(() => {
     connect();
-    
+
     return () => {
       disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Remove dependencies to prevent re-initialization
 
   // Cleanup on unmount

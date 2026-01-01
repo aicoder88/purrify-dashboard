@@ -1,6 +1,7 @@
 import { SignJWT } from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
-import type { LoginCredentials, User } from '@/types';
+import type { User } from '@/types';
+import { LoginSchema, validateInput } from '@/lib/validation';
 
 // Mock user data - replace with actual database query
 const mockUsers: User[] = [
@@ -30,20 +31,22 @@ const verifyPassword = (email: string, _password: string): boolean => {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: LoginCredentials = await request.json();
-    const { email, password, rememberMe } = body;
+    const body = await request.json();
 
-    // Validate input
-    if (!email || !password) {
+    // Validate input with Zod
+    const validation = validateInput(LoginSchema, body);
+    if (!validation.success || !validation.data) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: validation.error, details: validation.errors },
         { status: 400 }
       );
     }
 
+    const { email, password, rememberMe } = validation.data;
+
     // Find user
     const user = mockUsers.find(u => u.email === email);
-    
+
     if (!user || !verifyPassword(email, password)) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -56,10 +59,10 @@ export async function POST(request: NextRequest) {
       process.env.JWT_SECRET || 'your-secret-key'
     );
 
-    const token = await new SignJWT({ 
+    const token = await new SignJWT({
       userId: user.id,
       email: user.email,
-      role: user.role 
+      role: user.role,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -101,7 +104,6 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

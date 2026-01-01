@@ -20,7 +20,7 @@ import { useDashboardData, useRefreshDashboard } from '@/hooks/use-dashboard-dat
 import { useKeyboardShortcuts, createDefaultShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useRealTimeData } from '@/hooks/use-realtime-data';
 import { cn } from '@/lib/utils';
-import { FilterState, type SocialMediaWidget as SocialMediaWidgetType } from '@/types';
+import { FilterState, RealTimeUpdate, type SocialMediaWidget as SocialMediaWidgetType } from '@/types';
 
 // Mock data for demonstration
 const mockSocialData: SocialMediaWidgetType = {
@@ -136,7 +136,7 @@ function EnhancedDashboardContent() {
   });
 
   // Real-time data
-  const handleRealTimeUpdate = React.useCallback((update: any) => {
+  const handleRealTimeUpdate = React.useCallback((update: RealTimeUpdate) => {
     console.log('Real-time update:', update);
     // In a real app, you'd update your data based on the update type
   }, []);
