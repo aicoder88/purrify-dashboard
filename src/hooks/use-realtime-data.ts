@@ -9,6 +9,8 @@ interface UseRealTimeDataOptions {
   maxReconnectAttempts?: number;
   onUpdate?: (update: RealTimeUpdate) => void;
   onConnectionChange?: (connection: WebSocketConnection) => void;
+  /** Force mock mode even if WebSocket URL is set */
+  forceMock?: boolean;
 }
 
 interface UseRealTimeDataReturn {
@@ -17,6 +19,8 @@ interface UseRealTimeDataReturn {
   sendMessage: (message: Record<string, unknown>) => void;
   disconnect: () => void;
   reconnect: () => void;
+  /** Whether using real WebSocket or mock */
+  isMock: boolean;
 }
 
 // Event callback type
@@ -32,8 +36,58 @@ interface WebSocketErrorEvent {
   message?: string;
 }
 
-// Simulated WebSocket for demo purposes
-class MockWebSocket {
+// Common interface for both real and mock WebSocket
+interface WebSocketLike {
+  addEventListener(event: string, callback: EventCallback): void;
+  removeEventListener(event: string, callback: EventCallback): void;
+  send(data: string): void;
+  close(): void;
+  readonly isConnected: boolean;
+}
+
+// Real WebSocket wrapper that implements our interface
+class RealWebSocketWrapper implements WebSocketLike {
+  private ws: WebSocket;
+  private _isConnected = false;
+
+  constructor(url: string) {
+    this.ws = new WebSocket(url);
+
+    this.ws.onopen = () => {
+      this._isConnected = true;
+    };
+
+    this.ws.onclose = () => {
+      this._isConnected = false;
+    };
+  }
+
+  get isConnected(): boolean {
+    return this._isConnected && this.ws.readyState === WebSocket.OPEN;
+  }
+
+  addEventListener(event: string, callback: EventCallback): void {
+    this.ws.addEventListener(event, callback as EventListener);
+  }
+
+  removeEventListener(event: string, callback: EventCallback): void {
+    this.ws.removeEventListener(event, callback as EventListener);
+  }
+
+  send(data: string): void {
+    if (this.isConnected) {
+      this.ws.send(data);
+    }
+  }
+
+  close(): void {
+    this.ws.close();
+    this._isConnected = false;
+  }
+}
+
+// Simulated WebSocket for demo/development purposes
+class MockWebSocket implements WebSocketLike {
   private listeners: { [key: string]: EventCallback[] } = {};
   private intervalId: NodeJS.Timeout | null = null;
   public isConnected = false;
@@ -159,6 +213,34 @@ class MockWebSocket {
   }
 }
 
+// Get WebSocket URL from environment
+const getWebSocketUrl = (endpoint: string): string | null => {
+  // Check for configured WebSocket URL
+  const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
+  if (wsUrl) {
+    // If full URL provided, use it; otherwise append endpoint
+    return wsUrl.endsWith('/') ? `${wsUrl}${endpoint.slice(1)}` : `${wsUrl}${endpoint}`;
+  }
+  return null;
+};
+
+// Factory function to create appropriate WebSocket
+const createWebSocket = (endpoint: string, forceMock: boolean): { ws: WebSocketLike; isMock: boolean } => {
+  const wsUrl = getWebSocketUrl(endpoint);
+
+  // Use real WebSocket if URL is configured and not forcing mock
+  if (wsUrl && !forceMock && typeof window !== 'undefined') {
+    try {
+      return { ws: new RealWebSocketWrapper(wsUrl), isMock: false };
+    } catch (error) {
+      console.warn('Failed to create real WebSocket, falling back to mock:', error);
+    }
+  }
+
+  // Fall back to mock WebSocket
+  return { ws: new MockWebSocket(`ws://localhost:3000${endpoint}`), isMock: true };
+};
+
 export const useRealTimeData = (
   options: UseRealTimeDataOptions = {}
 ): UseRealTimeDataReturn => {
@@ -168,7 +250,10 @@ export const useRealTimeData = (
     maxReconnectAttempts = 5,
     onUpdate,
     onConnectionChange,
+    forceMock = false,
   } = options;
+
+  const [isMock, setIsMock] = React.useState(true);
 
   const [connection, setConnection] = React.useState<WebSocketConnection>({
     isConnected: false,
@@ -176,7 +261,7 @@ export const useRealTimeData = (
   });
 
   const [lastUpdate, setLastUpdate] = React.useState<RealTimeUpdate | null>(null);
-  const wsRef = React.useRef<MockWebSocket | null>(null);
+  const wsRef = React.useRef<WebSocketLike | null>(null);
   const reconnectTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const updateConnection = React.useCallback(
@@ -259,9 +344,9 @@ export const useRealTimeData = (
     }
 
     try {
-      // In a real implementation, this would be a real WebSocket
-      // const ws = new WebSocket(`ws://localhost:3000${endpoint}`);
-      const ws = new MockWebSocket(`ws://localhost:3000${endpoint}`);
+      // Use factory to create appropriate WebSocket (real or mock)
+      const { ws, isMock: isUsingMock } = createWebSocket(endpoint, forceMock);
+      setIsMock(isUsingMock);
 
       ws.addEventListener('open', handleOpen);
       ws.addEventListener('message', handleMessage);
@@ -269,10 +354,14 @@ export const useRealTimeData = (
       ws.addEventListener('error', handleError);
 
       wsRef.current = ws;
+
+      if (!isUsingMock) {
+        console.log('Connected to real WebSocket server');
+      }
     } catch (error) {
       handleError(error);
     }
-  }, [endpoint, handleOpen, handleMessage, handleClose, handleError]);
+  }, [endpoint, forceMock, handleOpen, handleMessage, handleClose, handleError]);
 
   // Store connect function in ref to avoid circular dependency
   connectRef.current = connect;
@@ -331,5 +420,6 @@ export const useRealTimeData = (
     sendMessage,
     disconnect,
     reconnect,
+    isMock,
   };
 };
